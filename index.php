@@ -30,7 +30,7 @@
         die("Connection failed: " . $conn->connect_error);
     }
 
-    //create table if doesn't exist...
+    //create todotable if doesn't exist...
     if ($return = $conn->query("SHOW TABLES LIKE 'todotable'")){
         if($return->num_rows == 0) {
           $table = $conn->query("CREATE TABLE todotable (
@@ -39,6 +39,33 @@
             disription TEXT(1000)
           )");
         //   echo "todotable Table Created.";
+        }
+    }
+
+    //create running table if doesn't exist...
+    if ($return = $conn->query("SHOW TABLES LIKE 'running'")){
+        if($return->num_rows == 0) {
+          $table = $conn->query("CREATE TABLE running (
+            id INT(100),
+            title VARCHAR(30) NOT NULL,
+            disription VARCHAR(100),
+            start_time timestamp
+          )");
+          echo "running Table Created.";
+        }
+    }
+
+    //creating completed_tasks table if doesn't exist...
+    if ($return = $conn->query("SHOW TABLES LIKE 'completed_tasks'")){
+        if($return->num_rows == 0) {
+          $table = $conn->query("CREATE TABLE completed_tasks (
+            id INT(100),
+            title VARCHAR(30) NOT NULL,
+            disription VARCHAR(100),
+            start_time timestamp,
+            end_time timestamp
+          )");
+          echo "completed_tasks Table Created.";
         }
     }
 
@@ -72,7 +99,7 @@
         <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
 </head>
-<body>
+<body style="background-color:#8ceda6">
     <nav class="navbar navbar-expand-sm bg-dark navbar-dark fixed-top">
         <a class="navbar-brand" href="index.php">Medkart</a>
         <ul class="navbar-nav">
@@ -99,7 +126,7 @@
     <?php   //checking if there is no data in todotable then printing nothin' here... 
             if(sizeof($res)==0){
     ?>          <tr>
-                    <h2>Nothin' here...</h2>
+                    <h2>Nothin' here...Add new task...</h2>
                 </tr>
     <?php
             }else{
@@ -143,6 +170,7 @@
                                 <!-- form to send id to running.php to send data from todotable to running table... -->
                                 <form action="running.php" method="post">
                                     <input type="hidden" name="title_id" value="<?php echo $res[$i][0]; ?>">
+                                    <input type="hidden" name="start_time" value="<?php $dateAdded = date('Y-m-d h:i:s'); echo $dateAdded; ?>">
                                     <button type="submit" name="submit"  class="btn btn-primary" value='1'>Start</button>
                                 </form>
                             </td>
@@ -150,6 +178,7 @@
                                 <!-- form to send id to Completed_tasks.php to send data from todotable to completed_tasks table... -->
                                 <form action="Completed_tasks.php" method="post">
                                     <input type="hidden" name="title_id" value="<?php echo $res[$i][0]; ?>">
+                                    <input type="hidden" name="done_time" value="<?php $dateAdded = date('Y-m-d h:i:s'); echo $dateAdded; ?>">
                                     <button type="submit" name="submit"  class="btn btn-success" value='1'>Done</button>
                                 </form>
                             </td> 
@@ -197,6 +226,9 @@
                     <th>
                         Discription
                     </th>
+                    <th>
+                        Start Time
+                    </th>
                 </tr>
     <?php   // echo '<pre>';
             // echo sizeof($res);
@@ -235,6 +267,12 @@
                     </th>
                     <th>
                         Discription
+                    </th>
+                    <th>
+                        Start Time
+                    </th>
+                    <th>
+                        End Time
                     </th>
                 </tr>
     <?php       // echo '<pre>';

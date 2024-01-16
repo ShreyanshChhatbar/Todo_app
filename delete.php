@@ -4,7 +4,7 @@ include "db.php";
 //deleting row from index page...
 if(isset($_POST['submit']) && isset($_POST['title_id'])){
 
-    echo '<script> alert("Do you want to delete? sure?"); </script>';    
+    echo '<script> alert("Do you want to delete? sure?"); </script>'; 
     $title_id = $_POST['title_id'];
     
     $conn->query("DELETE FROM todotable WHERE id = '$title_id'");

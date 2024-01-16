@@ -1,57 +1,53 @@
 <?php
-    include "db.php";
+include "db.php";
+
+//logic while getting data from index.php through post method...
 if(isset($_POST['submit'])){
 
-    //creating table if doesn't exist...
+    //creating completed_tasks table if doesn't exist...
     if ($return = $conn->query("SHOW TABLES LIKE 'completed_tasks'")){
         if($return->num_rows == 0) {
           $table = $conn->query("CREATE TABLE completed_tasks (
             id INT(100),
             title VARCHAR(30) NOT NULL,
-            disription VARCHAR(100)
+            disription VARCHAR(100),
+            start_time timestamp,
+            end_time timestamp
           )");
-          echo "completed_tasks Table Created.";
+        //   echo "completed_tasks Table Created.";
         }
     }
 
-    // $data = $_POST;
-    // echo '<pre>';
-    // echo print_r($data);
     $title_id = $_POST["title_id"];
 
     $rowww = $conn->query("SELECT * FROM todotable WHERE id = $title_id")->fetch_all();
-        // echo print_r($rowww);
     if(sizeof($rowww) > 0) {
+        $done_time = $_POST["done_time"];
         $row = $rowww[0];
-        $insert = $conn->query("INSERT INTO completed_tasks (id, title, disription) VALUES ( '$row[0]', '$row[1]', '$row[2]')");
-
-        //deleting fromtodo table...
+        // echo print_r($row);
+        $insert = $conn->query("INSERT INTO completed_tasks (id, title, disription, start_time, end_time) VALUES ( '$row[0]', '$row[1]', '$row[2]', '$done_time', '$done_time')");
         $conn->query("DELETE FROM todotable WHERE id = '$title_id'");
     }
-    
-    // echo print_r($select);
-    // exit();
-    // foreach ($array as $key => $value) {
-    //     $$key = $value;
-    // }
+        
 }
+
+//logic while getting data from running.php through get method...
 if(isset($_GET["submit"])){
     $tit_id = $_GET["title_id"];
-
+    $end_time = $_GET["end_time"];
     $nodee = $conn->query("SELECT * FROM running WHERE id = $tit_id")->fetch_all();
-        // echo print_r($rowww);
     if(sizeof($nodee) > 0) {
         $node = $nodee[0];
-        $insert = $conn->query("INSERT INTO completed_tasks (id, title, disription) VALUES ( '$node[0]', '$node[1]', '$node[2]')");
+        // echo print_r($node);
+        // exit();
+        $insert = $conn->query("INSERT INTO completed_tasks (id, title, disription, start_time,end_time) VALUES ( '$node[0]', '$node[1]', '$node[2]', '$node[3]', '$end_time')");
 
-        //deleting fromtodo table...
+        //deleting running table...
         $conn->query("DELETE FROM running WHERE id = '$tit_id'");
     }
 }
-$select = $conn->query("SELECT * FROM completed_tasks")->fetch_all();
-// echo"<pre>";
-// echo print_r($row);
 
+$select = $conn->query("SELECT * FROM completed_tasks")->fetch_all();
 
 ?>
 
@@ -67,7 +63,7 @@ $select = $conn->query("SELECT * FROM completed_tasks")->fetch_all();
         <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
 </head>
-<body>
+<body style="background-color:#8ceda6">
     <nav class="navbar navbar-expand-sm bg-dark navbar-dark fixed-top">
         <a class="navbar-brand" href="index.php">Home</a>
         <ul class="navbar-nav">
@@ -83,7 +79,6 @@ $select = $conn->query("SELECT * FROM completed_tasks")->fetch_all();
         </ul>
     </nav>
     <div class="container" style="margin-top:80px;">
-        <!-- <div class="row ml-1" style=" background-color:#1e81b0;"></div> -->
         <div class="table-responsive-sm">
             <center><h2 class="title">
                 Completed Tasks!
@@ -108,6 +103,12 @@ $select = $conn->query("SELECT * FROM completed_tasks")->fetch_all();
                         Discription
                     </th>
                     <th>
+                        Start Time
+                    </th>
+                    <th>
+                        End Time
+                    </th>
+                    <th>
                         Restore
                     </th>
                     <th>
@@ -115,10 +116,7 @@ $select = $conn->query("SELECT * FROM completed_tasks")->fetch_all();
                     </th>
                     
                 </tr>
-                <?php
-                // echo '<pre>';
-                // echo sizeof($res);
-                
+                <?php                
                     for($i=0;$i<sizeof($select);$i++){ ?>
                         <tr>
                             <?php
@@ -130,20 +128,16 @@ $select = $conn->query("SELECT * FROM completed_tasks")->fetch_all();
     <?php 
                         }?>
                             <td>
+                                <!-- form to send data to index.php to send data from completed_tasks table to restore data of that individual task... -->
                                 <form action="index.php" method="post">
-                                    <?php //echo $res[$i][0];
-                                    // exit();
-                                    ?>
                                     <input type="hidden" name="title_id" value="<?php echo $select[$i][0]; ?>">
                                     <button type="submit" name="submit"  class="btn btn-primary" value='1'>Restore</button>
                                 </form>
                             </td> 
                             
                             <td>
+                                <!-- form to send data to delete.php to send data from completed_tasks table to delete data of that individual task... -->
                                 <form action="delete.php" method="get">
-                                    <?php //echo $res[$i][0];
-                                    // exit();
-                                    ?>
                                     <input type="hidden" name="title_id" value="<?php echo $select[$i][0]; ?>">
                                     <button type="submit" name="submit"  class="btn btn-danger" value='1'>Delete</button>
                                 </form>
@@ -151,11 +145,6 @@ $select = $conn->query("SELECT * FROM completed_tasks")->fetch_all();
                         </tr><?php                       
                     }
                 }
-                
-                
-                
-                
-                
                 ?>
             </table>
         </div>
